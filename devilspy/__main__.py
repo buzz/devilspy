@@ -7,20 +7,14 @@ def main():
     """Start devilspy."""
     import gi
 
-    gi.require_version("GLib", "2.0")
     gi.require_version("Gdk", "3.0")
+    gi.require_version("GLib", "2.0")
+    gi.require_version("Gtk", "3.0")
     gi.require_version("Wnck", "3.0")
-    from gi.repository import Gdk, GLib
-    from devilspy.spy import WindowSpy
 
-    Gdk.init([])
-    main_loop = GLib.MainLoop()
-    spy = WindowSpy(debug=True)
+    from devilspy.cli import cli
 
-    try:
-        main_loop.run()
-    except KeyboardInterrupt:
-        main_loop.quit()
+    cli()  # pylint: disable=no-value-for-parameter
 
 
 if __name__ == "__main__":
