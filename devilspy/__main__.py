@@ -14,7 +14,8 @@ def main():
 
     from devilspy.cli import cli
 
-    cli()  # pylint: disable=no-value-for-parameter
+    # pylint: disable=no-value-for-parameter,unexpected-keyword-arg
+    cli(auto_envvar_prefix="DEVILSPY")
 
 
 if __name__ == "__main__":
