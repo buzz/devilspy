@@ -1,6 +1,7 @@
 """Command line interface."""
 
 import logging
+import os
 import sys
 
 import click
@@ -50,6 +51,12 @@ class CustomEpilogCommand(click.Command):
 @click.version_option(VERSION)
 def cli(print_window_info, verbose, no_actions, daemon):
     """Instantiate and start an devilspy."""
+    if daemon:
+        pid = os.fork()
+        if pid > 0:
+            # parent process
+            sys.exit(0)
+
     Gdk.init([])
     main_loop = GLib.MainLoop()
 
