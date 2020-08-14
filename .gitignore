@@ -1,0 +1,11 @@
+*.svn
+*~
+.DS_Store
+ThumbsDB
+\#*#
+.#*
+*.pyc
+/build
+/dist
+devilspy.egg-info
+/venv
