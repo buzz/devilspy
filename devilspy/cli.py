@@ -46,21 +46,6 @@ class CustomEpilogCommand(click.Command):
 
 @click.command(cls=CustomEpilogCommand, help=DESCRIPTION, epilog=get_epilog())
 @click.option(
-    "-p",
-    "--print-window-info",
-    is_flag=True,
-    help="Print information about new windows.",
-)
-@click.option(
-    "-d", "--debug", is_flag=True, help="Print debug messages.",
-)
-@click.option(
-    "-n", "--no-actions", is_flag=True, help="Do not carry out any window actions.",
-)
-@click.option(
-    "-d", "--daemon", is_flag=True, help="Fork into background.",
-)
-@click.option(
     "-c",
     "--config",
     callback=parse_config,
@@ -69,10 +54,21 @@ class CustomEpilogCommand(click.Command):
     help="Config file to load.",
     type=click.File("r"),
 )
+@click.option("-f", "--fork", is_flag=True, help="Fork into background.")
+@click.option(
+    "-n", "--no-actions", is_flag=True, help="Do not carry out any window actions."
+)
+@click.option(
+    "-p",
+    "--print-window-info",
+    is_flag=True,
+    help="Print information about new windows.",
+)
+@click.option("--debug", is_flag=True, help="Print debug messages.")
 @click.version_option(VERSION)
-def cli(config, print_window_info, debug, no_actions, daemon):
+def cli(config, fork, no_actions, print_window_info, debug):
     """Instantiate and start an devilspy."""
-    if daemon:
+    if fork:
         pid = os.fork()
         if pid > 0:
             # parent process
