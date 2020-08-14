@@ -70,8 +70,12 @@ class WindowSpy:
 
             elif action == "maximize":
                 logging.debug('Action "%s": Maximize', entry)
-                if not window.is_maximized():
-                    window.maximize()
+                if action_arg:
+                    if not window.is_maximized():
+                        window.maximize()
+                else:
+                    if window.is_maximized():
+                        window.unmaximize()
 
             elif action == "activate_workspace":
                 logging.debug('Action "%s": Activate workspace %d', entry, action_arg)
