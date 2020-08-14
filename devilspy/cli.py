@@ -6,7 +6,7 @@ import sys
 import click
 from gi.repository import Gdk, GLib
 
-from devilspy.meta import PROGRAM_NAME, LICENSE, COMMENTS, WEBSITE, VERSION
+from devilspy.meta import DESCRIPTION, WEBSITE, VERSION
 from devilspy.spy import WindowSpy
 
 EPILOG = """{}
@@ -31,7 +31,7 @@ class CustomEpilogCommand(click.Command):
                 formatter.write_text(line)
 
 
-@click.command(cls=CustomEpilogCommand, help=COMMENTS, epilog=_get_epilog())
+@click.command(cls=CustomEpilogCommand, help=DESCRIPTION, epilog=_get_epilog())
 @click.option(
     "-p",
     "--print-window-info",
@@ -39,13 +39,13 @@ class CustomEpilogCommand(click.Command):
     help="Print information about new windows.",
 )
 @click.option(
-    "-v", "--verbose", is_flag=False, help="Print actions taken for matching windows.",
+    "-v", "--verbose", is_flag=True, help="Print actions taken for matching windows.",
 )
 @click.option(
-    "-n", "--no-actions", is_flag=False, help="Do not carry out any window actions.",
+    "-n", "--no-actions", is_flag=True, help="Do not carry out any window actions.",
 )
 @click.option(
-    "-d", "--daemon", is_flag=False, help="Fork into background.",
+    "-d", "--daemon", is_flag=True, help="Fork into background.",
 )
 @click.version_option(VERSION)
 def cli(print_window_info, verbose, no_actions, daemon):
@@ -54,15 +54,14 @@ def cli(print_window_info, verbose, no_actions, daemon):
     main_loop = GLib.MainLoop()
 
     try:
-        spy = WindowSpy(
+        WindowSpy(
             print_window_info=print_window_info, verbose=verbose, no_actions=no_actions
         )
         main_loop.run()
     except KeyboardInterrupt:
         main_loop.quit()
-    except RuntimeError as error:
-        msg = "Something went wrong: {}".format(error)
-        logging.critical(msg)
+    except RuntimeError:
+        logging.exception("Error encountered! Exiting...")
         sys.exit(-1)
 
     sys.exit(0)
