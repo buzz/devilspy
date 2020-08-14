@@ -50,8 +50,10 @@ class WindowSpy:
                 for matcher in matchers:
                     val = matchers[matcher]
                     if matcher == "class_group_name":
-                        if window.get_class_group_name() == val:
-                            raise MatchFound()
+                        vals = val if isinstance(val, list) else (val,)
+                        for test_str in vals:
+                            if window.get_class_group_name() == test_str:
+                                raise MatchFound()
             except MatchFound:
                 logging.debug('Entry "%s" matched', entry)
                 self._action(entry, actions, window, screen)
