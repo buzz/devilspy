@@ -1,7 +1,11 @@
+"""Main devilspy manager object lives here."""
+
 from gi.repository import GLib, Wnck
 
 
 class WindowSpy:
+    """Hook into new events, match windows and carry out custom actions."""
+
     def __init__(self, print_window_info, verbose, no_actions):
         self._print_window_info = print_window_info
         self._verbose = verbose
