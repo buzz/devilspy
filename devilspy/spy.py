@@ -82,6 +82,9 @@ class WindowSpy:
                         # Delay workspace switch or some window managers have display issues
                         GLib.timeout_add(100, self._workspace_activate, workspace)
 
+            else:
+                logging.warning('Unknown action for "%s": %s', entry, action)
+
     def _workspace_activate(self, workspace):
         workspace.activate(0)
         return False
