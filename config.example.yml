@@ -1,0 +1,7 @@
+urxvt:
+  match:
+    class_group_name: URxvt
+  actions:
+    workspace: 1
+    maximize: true
+    activate_workspace: 1

@@ -2,12 +2,15 @@
 
 import logging
 import os
+import os.path
 import sys
 
 import click
 from gi.repository import Gdk, GLib
+import yaml
 
-from devilspy.meta import DESCRIPTION, WEBSITE, VERSION
+# from devilspy.logger import logger
+from devilspy.meta import DESCRIPTION, PROGRAM_NAME, WEBSITE, VERSION
 from devilspy.spy import WindowSpy
 
 EPILOG = """{}
@@ -16,9 +19,18 @@ This is free software; see the source for copying conditions. There is no
 warranty, not even for merchantability or fitness for a particular purpose.
 """
 
+config_home = GLib.get_user_config_dir()
+default_config_file = os.path.join(config_home, PROGRAM_NAME, "config.yml")
 
-def _get_epilog():
+
+def get_epilog():
+    """Format custom epilog."""
     return EPILOG.format(WEBSITE)
+
+
+def parse_config(_, __, value):
+    """Validate config file."""
+    return yaml.safe_load(value)
 
 
 class CustomEpilogCommand(click.Command):
@@ -32,7 +44,7 @@ class CustomEpilogCommand(click.Command):
                 formatter.write_text(line)
 
 
-@click.command(cls=CustomEpilogCommand, help=DESCRIPTION, epilog=_get_epilog())
+@click.command(cls=CustomEpilogCommand, help=DESCRIPTION, epilog=get_epilog())
 @click.option(
     "-p",
     "--print-window-info",
@@ -40,7 +52,7 @@ class CustomEpilogCommand(click.Command):
     help="Print information about new windows.",
 )
 @click.option(
-    "-v", "--verbose", is_flag=True, help="Print actions taken for matching windows.",
+    "-d", "--debug", is_flag=True, help="Print debug messages.",
 )
 @click.option(
     "-n", "--no-actions", is_flag=True, help="Do not carry out any window actions.",
@@ -48,8 +60,17 @@ class CustomEpilogCommand(click.Command):
 @click.option(
     "-d", "--daemon", is_flag=True, help="Fork into background.",
 )
+@click.option(
+    "-c",
+    "--config",
+    callback=parse_config,
+    default=default_config_file,
+    show_default=True,
+    help="Config file to load.",
+    type=click.File("r"),
+)
 @click.version_option(VERSION)
-def cli(print_window_info, verbose, no_actions, daemon):
+def cli(config, print_window_info, debug, no_actions, daemon):
     """Instantiate and start an devilspy."""
     if daemon:
         pid = os.fork()
@@ -57,12 +78,15 @@ def cli(print_window_info, verbose, no_actions, daemon):
             # parent process
             sys.exit(0)
 
+    log_level = logging.DEBUG if debug else logging.INFO
+    logging.basicConfig(level=log_level, format="%(levelname)s: %(message)s")
+
     Gdk.init([])
     main_loop = GLib.MainLoop()
 
     try:
         WindowSpy(
-            print_window_info=print_window_info, verbose=verbose, no_actions=no_actions
+            config, print_window_info, no_actions,
         )
         main_loop.run()
     except KeyboardInterrupt:
