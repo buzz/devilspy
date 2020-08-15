@@ -36,7 +36,10 @@ def parse_config(_, __, filepath):
             return yaml.safe_load(configfile.read())
     except FileNotFoundError:
         logger.warning("Could not load config file. Using empty config.")
-        return {}
+    except yaml.scanner.ScannerError as error:
+        logger.warning("Failed to parse config: %s", error)
+    logger.warning("Using empty config.")
+    return {}
 
 
 def cb_print_window_info(ctx, param, print_window_info):
