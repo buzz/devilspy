@@ -70,7 +70,7 @@ class CustomEpilogCommand(click.Command):
     is_flag=True,
     help="Print information about new windows.",
 )
-@click.option("--debug", is_flag=True, help="Print debug messages.")
+@click.option("-d", "--debug", is_flag=True, help="Print debug messages.")
 @click.version_option(VERSION)
 def cli(config, fork, no_actions, print_window_info, debug):
     """Instantiate and start an devilspy."""
