@@ -1,7 +1,8 @@
 """Main devilspy manager object lives here."""
 
-from gi.repository import GLib, Wnck
+from gi.repository import Wnck
 
+from devilspy.actions import perform_actions
 from devilspy.logger import logger
 from devilspy.match import match
 
@@ -30,56 +31,20 @@ class WindowSpy:
         self._match_window(window, screen)
 
     def _match_window(self, window, screen):
-        for entry in self._config:
-            logger.debug('Trying entry "%s"', entry)
+        for entry_name in self._config:
+            logger.debug('Trying entry "%s"', entry_name)
 
             try:
-                matchers = self._config[entry]["match"]
+                matchers = self._config[entry_name]["match"]
             except KeyError:
-                logger.warning('Missing key "match" for entry "%s"!', entry)
+                logger.warning('Missing key "match" for entry "%s"!', entry_name)
                 return
             try:
-                actions = self._config[entry]["actions"]
+                actions = self._config[entry_name]["actions"]
             except KeyError:
-                logger.warning('Missing key "actions" for entry "%s"!', entry)
+                logger.warning('Missing key "actions" for entry "%s"!', entry_name)
                 return
 
             if any(match(rule, arg, window) for rule, arg in matchers.items()):
-                logger.debug('Entry "%s" matched', entry)
-                self._action(entry, actions, window, screen)
-
-    def _action(self, entry, actions, window, screen):
-        for action, arg in actions.items():
-
-            if action == "workspace":
-                logger.debug('Action "%s": Move to workspace %d', entry, arg)
-                workspace_num = int(arg)
-                workspace = screen.get_workspace(workspace_num)
-                if workspace:
-                    if workspace != window.get_workspace():
-                        window.move_to_workspace(workspace)
-
-            elif action == "maximize":
-                logger.debug('Action "%s": Maximize', entry)
-                if arg:
-                    if not window.is_maximized():
-                        window.maximize()
-                else:
-                    if window.is_maximized():
-                        window.unmaximize()
-
-            elif action == "activate_workspace":
-                logger.debug('Action "%s": Activate workspace %d', entry, arg)
-                workspace_num = int(arg)
-                workspace = screen.get_workspace(workspace_num)
-                if workspace:
-                    if workspace != screen.get_active_workspace():
-                        # Delay workspace switch or some window managers have display issues
-                        GLib.timeout_add(100, self._workspace_activate, workspace)
-
-            else:
-                logger.warning('Unknown action for "%s": %s', entry, action)
-
-    def _workspace_activate(self, workspace):
-        workspace.activate(0)
-        return False
+                logger.debug('Entry "%s" matched', entry_name)
+                perform_actions(entry_name, actions, window, screen)
