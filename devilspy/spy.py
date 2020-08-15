@@ -22,10 +22,10 @@ class WindowSpy:
         self._screen.connect("window-opened", self._on_window_opened)
 
     def _print_info(self, window):
-        window_logger.info('  name:\t\t"%s"', window.get_name())
-        window_logger.info('  class_group:\t"%s"', window.get_class_group_name())
-        window_logger.info('  role:\t\t"%s"', window.get_role())
-        window_logger.info('  app_name:\t"%s"', window.get_application().get_name())
+        window_logger.info("  name:        '%s'", window.get_name())
+        window_logger.info("  class_group: '%s'", window.get_class_group_name())
+        window_logger.info("  role:        '%s'", window.get_role())
+        window_logger.info("  app_name:    '%s'", window.get_application().get_name())
 
     def _on_window_opened(self, screen, window):
         if self._print_window_info:
@@ -33,9 +33,10 @@ class WindowSpy:
         self._match_window(window, screen)
 
     def _match_window(self, window, screen):
-        for entry_name in self._config.entries:
-            logger.debug('Trying entry "%s"', entry_name)
-            matchers = self._config.entries[entry_name]["rules"]
-            if any(check_rule(rule, arg, window) for rule, arg in matchers.items()):
-                actions = self._config.entries[entry_name]["actions"]
-                perform_actions(entry_name, actions, window, screen)
+        for entry_name, entry in self._config.entries.items():
+            logger.debug("Trying entry '%s'", entry_name)
+            if any(
+                check_rule(entry_name, i, rule, window)
+                for i, rule in enumerate(entry["rules"])
+            ):
+                perform_actions(entry_name, entry["actions"], window, screen)

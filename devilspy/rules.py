@@ -7,19 +7,21 @@ from devilspy.logger import main_logger
 logger = main_logger.getChild("rules")
 
 
-def check_rule(name, arg, window):
+def check_rule(entry_name, i, rule, window):
     """Evaluate rule on window."""
-    field, val = arg["field"], arg["val"]
-    if name == "exact":
-        func_matcher = exact_string
-    elif name == "match":
-        func_matcher = match_string
-    elif name == "regex":
-        func_matcher = regex_string
+    if "match" in rule:
+        if rule["match"] == "exact":
+            func_matcher = exact_string
+        elif rule["match"] == "regex":
+            func_matcher = regex_string
+        elif rule["match"] == "substring":
+            func_matcher = substring_string
 
-    result = func_matcher(val, get_window_data(window, field))
-    logger.debug("match=%s rule_name=%s args=%s", result, name, arg)
-    return result
+        result = func_matcher(rule["val"], get_window_data(window, rule["field"]))
+        logger.debug("entry=%s match=%s rule=#%d %s", entry_name, result, i, rule)
+        return result
+
+    return False
 
 
 def get_window_data(window, field):
@@ -50,7 +52,7 @@ def regex_string(regexes, value):
     return False
 
 
-def match_string(match_strings, value):
+def substring_string(match_strings, value):
     """Check for substring in string."""
     for string in match_strings:
         if string in value:
