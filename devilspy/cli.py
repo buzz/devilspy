@@ -28,9 +28,14 @@ def get_epilog():
     return EPILOG.format(WEBSITE)
 
 
-def parse_config(_, __, value):
+def parse_config(_, __, filepath):
     """Validate config file."""
-    return yaml.safe_load(value)
+    try:
+        with open(filepath) as configfile:
+            return yaml.safe_load(configfile.read())
+    except FileNotFoundError:
+        logger.warning("Could not load config file. Using empty config.")
+        return {}
 
 
 class CustomEpilogCommand(click.Command):
@@ -52,7 +57,7 @@ class CustomEpilogCommand(click.Command):
     default=default_config_file,
     show_default=True,
     help="Config file to load.",
-    type=click.File("r"),
+    type=click.Path(dir_okay=False),
 )
 @click.option("-f", "--fork", is_flag=True, help="Fork into background.")
 @click.option(
