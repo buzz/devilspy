@@ -1,6 +1,6 @@
 urxvt:
   match:
-    class_group_name: URxvt
+    class_group: URxvt
   actions:
     workspace: 1
     maximize: true

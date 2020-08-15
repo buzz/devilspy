@@ -3,10 +3,7 @@
 from gi.repository import GLib, Wnck
 
 from devilspy.logger import logger
-
-
-class MatchFound(Exception):
-    """Raised when a window matches and actions should be performed."""
+from devilspy.match import match
 
 
 class WindowSpy:
@@ -47,25 +44,16 @@ class WindowSpy:
                 logger.warning('Missing key "actions" for entry "%s"!', entry)
                 return
 
-            try:
-                for matcher in matchers:
-                    val = matchers[matcher]
-                    if matcher == "class_group_name":
-                        vals = val if isinstance(val, list) else (val,)
-                        for test_str in vals:
-                            if window.get_class_group_name() == test_str:
-                                raise MatchFound()
-            except MatchFound:
+            if any(match(rule, arg, window) for rule, arg in matchers.items()):
                 logger.debug('Entry "%s" matched', entry)
                 self._action(entry, actions, window, screen)
 
     def _action(self, entry, actions, window, screen):
-        for action in actions:
-            action_arg = actions[action]
+        for action, arg in actions.items():
 
             if action == "workspace":
-                logger.debug('Action "%s": Move to workspace %d', entry, action_arg)
-                workspace_num = int(action_arg)
+                logger.debug('Action "%s": Move to workspace %d', entry, arg)
+                workspace_num = int(arg)
                 workspace = screen.get_workspace(workspace_num)
                 if workspace:
                     if workspace != window.get_workspace():
@@ -73,7 +61,7 @@ class WindowSpy:
 
             elif action == "maximize":
                 logger.debug('Action "%s": Maximize', entry)
-                if action_arg:
+                if arg:
                     if not window.is_maximized():
                         window.maximize()
                 else:
@@ -81,8 +69,8 @@ class WindowSpy:
                         window.unmaximize()
 
             elif action == "activate_workspace":
-                logger.debug('Action "%s": Activate workspace %d', entry, action_arg)
-                workspace_num = int(action_arg)
+                logger.debug('Action "%s": Activate workspace %d', entry, arg)
+                workspace_num = int(arg)
                 workspace = screen.get_workspace(workspace_num)
                 if workspace:
                     if workspace != screen.get_active_workspace():
