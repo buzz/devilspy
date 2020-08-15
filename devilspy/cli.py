@@ -10,6 +10,7 @@ from gi.repository import Gdk, GLib
 import yaml
 
 # from devilspy.logger import logger
+from devilspy.logger import logger
 from devilspy.meta import DESCRIPTION, PROGRAM_NAME, WEBSITE, VERSION
 from devilspy.spy import WindowSpy
 
@@ -79,8 +80,8 @@ def cli(config, fork, no_actions, print_window_info, debug):
             # parent process
             sys.exit(0)
 
-    log_level = logging.DEBUG if debug else logging.INFO
-    logging.basicConfig(level=log_level, format="%(levelname)s: %(message)s")
+    if debug:
+        logger.setLevel(logging.DEBUG)
 
     Gdk.init([])
     main_loop = GLib.MainLoop()
@@ -93,7 +94,7 @@ def cli(config, fork, no_actions, print_window_info, debug):
     except KeyboardInterrupt:
         main_loop.quit()
     except RuntimeError:
-        logging.exception("Error encountered! Exiting...")
+        logger.exception("Error encountered! Exiting...")
         sys.exit(-1)
 
     sys.exit(0)

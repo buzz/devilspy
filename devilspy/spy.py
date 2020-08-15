@@ -1,7 +1,8 @@
 """Main devilspy manager object lives here."""
 
-import logging
 from gi.repository import GLib, Wnck
+
+from devilspy.logger import logger
 
 
 class MatchFound(Exception):
@@ -20,30 +21,30 @@ class WindowSpy:
         self._screen.connect("window-opened", self._on_window_opened)
 
     def _print_info(self, window):
-        logging.info('  name:\t\t"%s"', window.get_name())
-        logging.info('  class_group:\t"%s"', window.get_class_group_name())
-        logging.info('  role:\t\t"%s"', window.get_role())
-        logging.info('  app_name:\t"%s"', window.get_application().get_name())
+        logger.info("New window")
+        logger.info('  name:\t\t"%s"', window.get_name())
+        logger.info('  class_group:\t"%s"', window.get_class_group_name())
+        logger.info('  role:\t\t"%s"', window.get_role())
+        logger.info('  app_name:\t"%s"', window.get_application().get_name())
 
     def _on_window_opened(self, screen, window):
-        logging.debug('New window: "%s"', window.get_name())
         if self._print_window_info:
             self._print_info(window)
         self._match_window(window, screen)
 
     def _match_window(self, window, screen):
         for entry in self._config:
-            logging.debug('Trying entry "%s"', entry)
+            logger.debug('Trying entry "%s"', entry)
 
             try:
                 matchers = self._config[entry]["match"]
             except KeyError:
-                logging.warning('Missing key "match" for entry "%s"!', entry)
+                logger.warning('Missing key "match" for entry "%s"!', entry)
                 return
             try:
                 actions = self._config[entry]["actions"]
             except KeyError:
-                logging.warning('Missing key "actions" for entry "%s"!', entry)
+                logger.warning('Missing key "actions" for entry "%s"!', entry)
                 return
 
             try:
@@ -55,7 +56,7 @@ class WindowSpy:
                             if window.get_class_group_name() == test_str:
                                 raise MatchFound()
             except MatchFound:
-                logging.debug('Entry "%s" matched', entry)
+                logger.debug('Entry "%s" matched', entry)
                 self._action(entry, actions, window, screen)
 
     def _action(self, entry, actions, window, screen):
@@ -63,7 +64,7 @@ class WindowSpy:
             action_arg = actions[action]
 
             if action == "workspace":
-                logging.debug('Action "%s": Move to workspace %d', entry, action_arg)
+                logger.debug('Action "%s": Move to workspace %d', entry, action_arg)
                 workspace_num = int(action_arg)
                 workspace = screen.get_workspace(workspace_num)
                 if workspace:
@@ -71,7 +72,7 @@ class WindowSpy:
                         window.move_to_workspace(workspace)
 
             elif action == "maximize":
-                logging.debug('Action "%s": Maximize', entry)
+                logger.debug('Action "%s": Maximize', entry)
                 if action_arg:
                     if not window.is_maximized():
                         window.maximize()
@@ -80,7 +81,7 @@ class WindowSpy:
                         window.unmaximize()
 
             elif action == "activate_workspace":
-                logging.debug('Action "%s": Activate workspace %d', entry, action_arg)
+                logger.debug('Action "%s": Activate workspace %d', entry, action_arg)
                 workspace_num = int(action_arg)
                 workspace = screen.get_workspace(workspace_num)
                 if workspace:
@@ -89,7 +90,7 @@ class WindowSpy:
                         GLib.timeout_add(100, self._workspace_activate, workspace)
 
             else:
-                logging.warning('Unknown action for "%s": %s', entry, action)
+                logger.warning('Unknown action for "%s": %s', entry, action)
 
     def _workspace_activate(self, workspace):
         workspace.activate(0)
