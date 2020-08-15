@@ -4,7 +4,7 @@ from gi.repository import Wnck
 
 from devilspy.actions import perform_actions
 from devilspy.logger import logger
-from devilspy.match import match
+from devilspy.rules import check_rule
 
 
 class WindowSpy:
@@ -35,9 +35,9 @@ class WindowSpy:
             logger.debug('Trying entry "%s"', entry_name)
 
             try:
-                matchers = self._config[entry_name]["match"]
+                matchers = self._config[entry_name]["rules"]
             except KeyError:
-                logger.warning('Missing key "match" for entry "%s"!', entry_name)
+                logger.warning('Missing key "rules" for entry "%s"!', entry_name)
                 return
             try:
                 actions = self._config[entry_name]["actions"]
@@ -45,6 +45,6 @@ class WindowSpy:
                 logger.warning('Missing key "actions" for entry "%s"!', entry_name)
                 return
 
-            if any(match(rule, arg, window) for rule, arg in matchers.items()):
+            if any(check_rule(rule, arg, window) for rule, arg in matchers.items()):
                 logger.debug('Entry "%s" matched', entry_name)
                 perform_actions(entry_name, actions, window, screen)

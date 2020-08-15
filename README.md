@@ -44,7 +44,7 @@ devilspy takes a declarative approach to configuration. Create a config file
 
 ```yaml
 KEY:
-  match:
+  rules:
     MATCHER: [...]
     [...]
   actions:
@@ -60,7 +60,7 @@ matchers and actions.
 
 ```yaml
 browser:
-  match:
+  rules:
     class_group_name:
       - Chromium
       - firefox
