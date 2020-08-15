@@ -4,11 +4,38 @@ import yaml
 
 from devilspy.logger import main_logger
 
-ALLOWED_ACTIONS = ("workspace", "maximize", "activate_workspace")
-ALLOWED_STRING_RULES = ("exact", "regex", "substring")
-ALLOWED_STRING_FIELDS = ("class_group", "name", "role", "app_name")
-
 logger = main_logger.getChild("config")
+
+
+def validate_type(val, exp_type):
+    """Ensure val is of type."""
+    if isinstance(val, exp_type):
+        return None
+    else:
+        return "Expected type {} (got {}).".format(
+            exp_type.__name__, type(val).__name__
+        )
+
+
+def validate_int(val):
+    """Ensure val is of type int."""
+    return validate_type(val, int)
+
+
+def validate_bool(val):
+    """Ensure val is of type bool."""
+    return validate_type(val, bool)
+
+
+ACTION_ARG_VALIDATORS = {
+    "workspace": validate_int,
+    "maximize": validate_bool,
+    "activate_workspace": validate_int,
+}
+ALLOWED_ACTIONS = ACTION_ARG_VALIDATORS.keys()
+
+RULE_NAMES = ("exact", "regex", "substring")
+FIELD_NAMES = ("class_group", "name", "role", "app_name")
 
 
 class Config:
@@ -104,8 +131,8 @@ class Config:
 
         # Check key values
         for k, allowed in (
-            ("match", ALLOWED_STRING_RULES),
-            ("field", ALLOWED_STRING_FIELDS),
+            ("match", RULE_NAMES),
+            ("field", FIELD_NAMES),
         ):
             if rule[k] not in allowed:
                 msg = "Value of '{}' must be one of {}.".format(k, allowed)
@@ -136,19 +163,28 @@ class Config:
                 "arg": action[name],
             }
 
-        # Validate action
-        if "name" in action:
-            if action["name"] not in ALLOWED_ACTIONS:
-                msg = "Value of 'name' must be one of {}.".format(ALLOWED_ACTIONS)
-                cls._log_invalid_action(msg, i, action, entry_name)
+        # Check key presence
+        for k in ("name", "arg"):
+            if k not in action:
+                cls._log_invalid_action(
+                    "Missing '{}' key.".format(k), i, action, entry_name
+                )
                 return None
 
-            # TODO Validate arg
+        # Check allowed actions
+        if action["name"] not in ALLOWED_ACTIONS:
+            msg = "Value of 'name' must be one of {}.".format(ALLOWED_ACTIONS)
+            cls._log_invalid_action(msg, i, action, entry_name)
+            return None
 
-            return action
+        # Check arg type
+        result = ACTION_ARG_VALIDATORS[action["name"]](action["arg"])
+        if result is not None:
+            msg = "Could not validate value of 'arg': {}".format(result)
+            cls._log_invalid_action(msg, i, action, entry_name)
+            return None
 
-        cls._log_invalid_action("Could not parse action.", i, action, entry_name)
-        return None
+        return action
 
     @classmethod
     def _log_invalid_action(cls, message, i, action, entry_name):
