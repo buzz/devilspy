@@ -3,6 +3,6 @@
 import logging
 from devilspy.meta import PROGRAM_NAME
 
-logging.basicConfig(format="%(levelname)s: %(message)s")
-logger = logging.getLogger(PROGRAM_NAME)
-logger.setLevel(logging.INFO)
+logging.basicConfig(format="%(name)s:%(levelname)s: %(message)s")
+main_logger = logging.getLogger(PROGRAM_NAME)
+main_logger.setLevel(logging.INFO)

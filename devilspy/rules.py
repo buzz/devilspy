@@ -2,7 +2,9 @@
 
 import re
 
-from devilspy.logger import logger
+from devilspy.logger import main_logger
+
+logger = main_logger.getChild("rules")
 
 
 def check_rule(name, arg, window):

@@ -2,7 +2,9 @@
 
 from gi.repository import GLib
 
-from devilspy.logger import logger
+from devilspy.logger import main_logger
+
+logger = main_logger.getChild("actions")
 
 
 def perform_actions(entry_name, actions, window, screen):

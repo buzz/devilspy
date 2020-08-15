@@ -3,8 +3,11 @@
 from gi.repository import Wnck
 
 from devilspy.actions import perform_actions
-from devilspy.logger import logger
+from devilspy.logger import main_logger
 from devilspy.rules import check_rule
+
+window_logger = main_logger.getChild("window")
+logger = main_logger.getChild("spy")
 
 
 class WindowSpy:
@@ -19,11 +22,10 @@ class WindowSpy:
         self._screen.connect("window-opened", self._on_window_opened)
 
     def _print_info(self, window):
-        logger.info("New window")
-        logger.info('  name:\t\t"%s"', window.get_name())
-        logger.info('  class_group:\t"%s"', window.get_class_group_name())
-        logger.info('  role:\t\t"%s"', window.get_role())
-        logger.info('  app_name:\t"%s"', window.get_application().get_name())
+        window_logger.info('  name:\t\t"%s"', window.get_name())
+        window_logger.info('  class_group:\t"%s"', window.get_class_group_name())
+        window_logger.info('  role:\t\t"%s"', window.get_role())
+        window_logger.info('  app_name:\t"%s"', window.get_application().get_name())
 
     def _on_window_opened(self, screen, window):
         if self._print_window_info:

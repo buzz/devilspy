@@ -9,7 +9,7 @@ import click
 from gi.repository import Gdk, GLib
 
 from devilspy.config import Config
-from devilspy.logger import logger
+from devilspy.logger import main_logger
 from devilspy.meta import DESCRIPTION, PROGRAM_NAME, WEBSITE, VERSION
 from devilspy.spy import WindowSpy
 
@@ -37,7 +37,7 @@ def cb_print_window_info(ctx, param, print_window_info):
     """Enable if debug is set."""
     try:
         if ctx.params["debug"]:
-            logger.info("Enabling --print-window-info as --debug is true.")
+            main_logger.info("Enabling --print-window-info as --debug is true.")
             return True
     except KeyError:
         pass
@@ -87,7 +87,7 @@ def cli(config, fork, no_actions, print_window_info, debug):
             sys.exit(0)
 
     if debug:
-        logger.setLevel(logging.DEBUG)
+        main_logger.setLevel(logging.DEBUG)
 
     Gdk.init([])
     main_loop = GLib.MainLoop()
