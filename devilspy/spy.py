@@ -31,20 +31,9 @@ class WindowSpy:
         self._match_window(window, screen)
 
     def _match_window(self, window, screen):
-        for entry_name in self._config:
+        for entry_name in self._config.entries:
             logger.debug('Trying entry "%s"', entry_name)
-
-            try:
-                matchers = self._config[entry_name]["rules"]
-            except KeyError:
-                logger.warning('Missing key "rules" for entry "%s"!', entry_name)
-                return
-            try:
-                actions = self._config[entry_name]["actions"]
-            except KeyError:
-                logger.warning('Missing key "actions" for entry "%s"!', entry_name)
-                return
-
+            matchers = self._config.entries[entry_name]["rules"]
             if any(check_rule(rule, arg, window) for rule, arg in matchers.items()):
-                logger.debug('Entry "%s" matched', entry_name)
+                actions = self._config.entries[entry_name]["actions"]
                 perform_actions(entry_name, actions, window, screen)

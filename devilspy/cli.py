@@ -7,9 +7,8 @@ import sys
 
 import click
 from gi.repository import Gdk, GLib
-import yaml
 
-# from devilspy.logger import logger
+from devilspy.config import Config
 from devilspy.logger import logger
 from devilspy.meta import DESCRIPTION, PROGRAM_NAME, WEBSITE, VERSION
 from devilspy.spy import WindowSpy
@@ -31,15 +30,7 @@ def get_epilog():
 
 def parse_config(_, __, filepath):
     """Validate config file."""
-    try:
-        with open(filepath) as configfile:
-            return yaml.safe_load(configfile.read())
-    except FileNotFoundError:
-        logger.warning("Could not load config file. Using empty config.")
-    except yaml.scanner.ScannerError as error:
-        logger.warning("Failed to parse config: %s", error)
-    logger.warning("Using empty config.")
-    return {}
+    return Config(filepath)
 
 
 def cb_print_window_info(ctx, param, print_window_info):
@@ -108,8 +99,5 @@ def cli(config, fork, no_actions, print_window_info, debug):
         main_loop.run()
     except KeyboardInterrupt:
         main_loop.quit()
-    except RuntimeError:
-        logger.exception("Error encountered! Exiting...")
-        sys.exit(-1)
 
     sys.exit(0)
