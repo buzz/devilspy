@@ -23,7 +23,23 @@ Or, even better, use the [AUR package](TODO) if you're on Arch Linux.
 
 ## Usage
 
-devilspy takes an declarative approach to configuration. Create a config file
+Start devilspy on the command line to identify new windows.
+
+```
+$ devilspy --print-window-info
+```
+
+Usually you want to start devilspy in the background with your login session
+once you have your rules setup. Use *Startup applications*, *Autostart* or
+similar, depending on your Desktop Environment.
+
+```
+$ devilspy --fork
+```
+
+## Configuration
+
+devilspy takes a declarative approach to configuration. Create a config file
 `~/.config/devilspy/config.yml` in the following form.
 
 ```yaml
