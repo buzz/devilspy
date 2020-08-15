@@ -39,6 +39,17 @@ def parse_config(_, __, filepath):
         return {}
 
 
+def cb_print_window_info(ctx, param, print_window_info):
+    """Enable if debug is set."""
+    try:
+        if ctx.params["debug"]:
+            logger.info("Enabling --print-window-info as --debug is true.")
+            return True
+    except KeyError:
+        pass
+    return print_window_info
+
+
 class CustomEpilogCommand(click.Command):
     """Format epilog in a custom way."""
 
@@ -67,6 +78,7 @@ class CustomEpilogCommand(click.Command):
 @click.option(
     "-p",
     "--print-window-info",
+    callback=cb_print_window_info,
     is_flag=True,
     help="Print information about new windows.",
 )
