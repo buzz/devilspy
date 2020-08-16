@@ -29,15 +29,15 @@ def get_epilog():
 
 
 def parse_config(_, __, filepath):
-    """Validate config file."""
-    return Config(filepath)
+    """Parse YAML config file."""
+    return Config.load_yaml_file(filepath)
 
 
 def cb_print_window_info(ctx, param, print_window_info):
     """Enable if debug is set."""
     try:
-        if ctx.params["debug"]:
-            main_logger.info("Enabling --print-window-info as --debug is true.")
+        if ctx.params["debug"] and not print_window_info:
+            main_logger.info("Enabling --print-window-info because --debug is true.")
             return True
     except KeyError:
         pass

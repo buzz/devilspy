@@ -3,11 +3,8 @@
 from gi.repository import Wnck
 
 from devilspy.logger import main_logger
-from devilspy.spy.actions import perform_actions
-from devilspy.spy.rules import check_rule
 
 window_logger = main_logger.getChild("window")
-logger = main_logger.getChild("spy")
 
 
 class WindowSpy:
@@ -19,21 +16,19 @@ class WindowSpy:
         self._no_actions = no_actions
 
         self._screen = Wnck.Screen.get_default()
-        self._screen.connect("window-opened", self._on_window_opened)
+        self._screen.connect("window-opened", self.on_window_opened)
 
-    def _on_window_opened(self, screen, window):
+    def on_window_opened(self, screen, window):
+        """Callback for new windows."""
         if self._print_window_info:
             WindowSpy._print_info(window)
-        self._match_window(window, screen)
+        self.match_window(window, screen)
 
-    def _match_window(self, window, screen):
-        for entry_name, entry in self._config.entries.items():
-            logger.debug("Trying entry '%s'", entry_name)
-            if any(
-                check_rule(entry_name, i, rule, window)
-                for i, rule in enumerate(entry["rules"])
-            ):
-                perform_actions(entry_name, entry["actions"], window, screen)
+    def match_window(self, window, screen):
+        """Match window agains all entries in configuration."""
+        for entry in self._config.entries:
+            if entry.match(window):
+                entry.run_actions(window, screen, dry_run=self._no_actions)
 
     @staticmethod
     def _print_info(window):
