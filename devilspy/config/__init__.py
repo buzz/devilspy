@@ -2,40 +2,15 @@
 
 import yaml
 
+from devilspy.constants import (
+    ACTION_ARG_VALIDATORS,
+    ALLOWED_ACTIONS,
+    FIELD_NAMES,
+    RULE_NAMES,
+)
 from devilspy.logger import main_logger
 
 logger = main_logger.getChild("config")
-
-
-def validate_type(val, exp_type):
-    """Ensure val is of type."""
-    if isinstance(val, exp_type):
-        return None
-    else:
-        return "Expected type {} (got {}).".format(
-            exp_type.__name__, type(val).__name__
-        )
-
-
-def validate_int(val):
-    """Ensure val is of type int."""
-    return validate_type(val, int)
-
-
-def validate_bool(val):
-    """Ensure val is of type bool."""
-    return validate_type(val, bool)
-
-
-ACTION_ARG_VALIDATORS = {
-    "workspace": validate_int,
-    "maximize": validate_bool,
-    "activate_workspace": validate_int,
-}
-ALLOWED_ACTIONS = ACTION_ARG_VALIDATORS.keys()
-
-RULE_NAMES = ("exact", "regex", "substring")
-FIELD_NAMES = ("class_group", "name", "role", "app_name")
 
 
 class Config:
