@@ -1,7 +1,7 @@
 """Version string used by program and setup.py (using regex parsing)."""
 from gi.repository import Gtk
 
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 PROGRAM_NAME = "devilspy"
 COPYRIGHT = "(c) buzz"
 LICENSE = Gtk.License.GPL_2_0
