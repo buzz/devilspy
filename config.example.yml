@@ -1,7 +1,17 @@
 urxvt:
-  match:
-    class_group: URxvt
+  rules:
+    - class_group: URxvt
+    - match: exact
+      field: class_group
+      val: URxvt
+    - match: regex
+      field: class_group
+      val: ^URxv[td]
+    - match: substring
+      field: class_group
+      val: Rxv
   actions:
-    workspace: 1
-    maximize: true
-    activate_workspace: 1
+    - name: workspace
+      arg: 1
+    - maximize: true
+    - activate_workspace: 1
