@@ -6,4 +6,4 @@ PROGRAM_NAME = "devilspy"
 COPYRIGHT = "(c) buzz"
 LICENSE = Gtk.License.GPL_2_0
 DESCRIPTION = "Window matching utility"
-WEBSITE = "https://buzz.github.io/devilspy/"
+WEBSITE = "https://github.com/buzz/devilspy"

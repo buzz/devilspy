@@ -39,7 +39,7 @@ setup(
         "Operating System :: POSIX :: Linux",
         "Topic :: Desktop Environment",
     ],
-    url="https://buzz.github.io/devilspy/",
+    url="https://github.com/buzz/devilspy",
     packages=find_packages(),
     install_requires=["click", "PyGObject", "PyYAML"],
     include_package_data=True,
