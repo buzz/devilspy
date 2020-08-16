@@ -44,12 +44,12 @@ devilspy takes a declarative approach to configuration. Create a config file
 
 ```yaml
 KEY:
-  rules:
-    MATCHER: [...]
-    [...]
-  actions:
-    ACTION: [...]
-    [...]
+  - rules:
+    - MATCHER: [...]
+    - [...]
+  - actions:
+    - ACTION: [...]
+    - [...]
 [...]
 ```
 
@@ -61,17 +61,17 @@ matchers and actions.
 ```yaml
 browser:
   rules:
-    class_group_name:
+    - class_group:
       - Chromium
       - firefox
   actions:
-    workspace: 2
-    activate_workspace: 2
+    - workspace: 2
+    - activate_workspace: 2
 irc:
   match:
-    class_group_name: Hexchat
+    - class_group: Hexchat
   actions:
-    maximize: true
+    - maximize: true
 ```
 
 ## License
