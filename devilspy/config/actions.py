@@ -80,7 +80,10 @@ class ActivateWorkspaceAction(AbstractBaseAction):
 
     def run(self, window, screen):
         space = screen.get_workspace(self.arg)
-        if space and space != screen.get_active_workspace():
+        if space:
+            active_space = screen.get_active_workspace()
+            if active_space and space == active_space:
+                return
             # Delay workspace switch or some window managers have display issues
             GLib.timeout_add(100, self._delayed_activate_workspace, space)
 
