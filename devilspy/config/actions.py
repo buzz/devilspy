@@ -115,6 +115,22 @@ class ActivateWorkspaceAction(AbstractBaseAction):
         return False  # Notify GLib to cancel this timeout
 
 
+class DecorateAction(AbstractBaseAction):
+    """(Un)decorate window."""
+
+    name = "decorate"
+    arg_type = bool
+
+    def run(self, window, screen):
+        xid = window.get_xid()
+        gdk_display = GdkX11.X11Display.get_default()
+        gdk_window = GdkX11.X11Window.foreign_new_for_display(gdk_display, xid)
+        if self.arg:
+            gdk_window.set_decorations(Gdk.WMDecoration.ALL)
+        else:
+            gdk_window.set_decorations(0)
+
+
 class MaximizeAction(AbstractBaseAction):
     """(Un)maximize window."""
 
@@ -267,6 +283,7 @@ class WorkspaceAction(AbstractBaseAction):
 
 ACTION_CLASSES = (
     ActivateWorkspaceAction,
+    DecorateAction,
     MaximizeAction,
     MaximizeHAction,
     MaximizeVAction,
