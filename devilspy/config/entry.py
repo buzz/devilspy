@@ -37,9 +37,12 @@ class Entry(AbstractBaseConfigEntity):
                     item = item_class.create(item_data, idx)
                     getattr(self, key).append(item)
                 except InvalidActionError as error:
-                    logger.warning("Invalid action: '%s' %s", self.name, error.message)
+                    logger.warning("Invalid action: '%s': %s", self.name, error.message)
                 except InvalidRuleError as error:
                     logger.warning("Invalid rule: '%s': %s", self.name, error.message)
+
+            if not getattr(self, key):
+                raise InvalidEntryError("Entry has no valid {}.".format(key))
 
     @classmethod
     def validate(cls, data):

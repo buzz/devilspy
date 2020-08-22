@@ -10,6 +10,8 @@ from devilspy.config.errors import InvalidActionError
 class AbstractBaseAction(AbstractBaseConfigEnumerableEntity, metaclass=ABCMeta):
     """Abstract base class for all actions."""
 
+    arg_types = ()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.arg = None
@@ -25,30 +27,36 @@ class AbstractBaseAction(AbstractBaseConfigEnumerableEntity, metaclass=ABCMeta):
             try:
                 name = list(data.keys())[0]  # Short notation?
             except (AttributeError, IndexError):
-                raise InvalidActionError("Could not parse.")
+                raise InvalidActionError(cls, "Could not parse.")
         try:
             return ACTION_MAPPING[name]
         except KeyError:
             vals = ACTION_MAPPING.keys()
             raise InvalidActionError(
-                "Invalid value for 'name'. Must be one of {}.".format(vals)
+                cls, "Invalid value for 'name'. Must be one of {}.".format(vals)
             )
 
     @classmethod
     def validate(cls, data):
         if not isinstance(data, dict):
-            raise InvalidActionError("Action must be of type dict.")
+            raise InvalidActionError(cls, "Action must be of type dict.")
 
         # Transform action short notation into canonical presentation.
         if len(data.keys()) == 1:
             name = list(data.keys())[0]
-            return {
+            data = {
                 "name": name,
                 "arg": data[name],
             }
 
         if "arg" not in data:
-            raise InvalidActionError("Missing key 'arg'.")
+            raise InvalidActionError(cls, "Missing key 'arg'.")
+
+        if not isinstance(data["arg"], cls.arg_types):
+            types = " or ".join(type_.__name__ for type_ in cls.arg_types)
+            raise InvalidActionError(
+                cls, "Field 'arg' must be of type {}.".format(types)
+            )
 
         return data
 
@@ -61,18 +69,11 @@ class ActivateWorkspaceAction(AbstractBaseAction):
     """Switch to another workspace."""
 
     name = "activate_workspace"
+    arg_types = (int,)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.workspace_idx = None
-
-    @classmethod
-    def validate(cls, data):
-        data = super().validate(data)
-        # TODO: support True to switch to window workspace?
-        if not isinstance(data["arg"], int):
-            raise InvalidActionError("Field 'arg' must be of type int.")
-        return data
 
     def run(self, window, screen):
         space = screen.get_workspace(self.arg)
@@ -91,13 +92,7 @@ class MaximizeAction(AbstractBaseAction):
     """(Un)maximize window."""
 
     name = "maximize"
-
-    @classmethod
-    def validate(cls, data):
-        data = super().validate(data)
-        if not isinstance(data["arg"], bool):
-            raise InvalidActionError("Field 'arg' must be of type bool.")
-        return data
+    arg_types = (bool,)
 
     def run(self, window, screen):
         if self.arg:
@@ -112,13 +107,7 @@ class WorkspaceAction(AbstractBaseAction):
     """Move window to another workspace."""
 
     name = "workspace"
-
-    @classmethod
-    def validate(cls, data):
-        data = super().validate(data)
-        if not isinstance(data["arg"], int):
-            raise InvalidActionError("Field 'arg' must be of type int.")
-        return data
+    arg_types = (int,)
 
     def run(self, window, screen):
         space = screen.get_workspace(self.arg)

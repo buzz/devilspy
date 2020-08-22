@@ -21,7 +21,7 @@ class AbstractBaseRule(AbstractBaseConfigEnumerableEntity, metaclass=ABCMeta):
     @classmethod
     def validate(cls, data):
         if not isinstance(data, dict):
-            raise InvalidRuleError("Rule must be of type dict.")
+            raise InvalidRuleError(cls, "Rule must be of type dict.")
         return data
 
     @abstractmethod
@@ -60,14 +60,14 @@ class AbstractBaseStringMatcherRule(AbstractBaseRule, metaclass=ABCMeta):
 
         # Check field
         if "field" not in data:
-            raise InvalidRuleError("Missing 'field' key.")
+            raise InvalidRuleError(cls, "Missing 'field' key.")
         if data["field"] not in FIELD_NAMES:
             msg = "Value of 'field' must be one of {}.".format(FIELD_NAMES)
-            raise InvalidRuleError(msg)
+            raise InvalidRuleError(cls, msg)
 
         # Check val
         if "val" not in data:
-            raise InvalidRuleError("Missing 'val' key.")
+            raise InvalidRuleError(cls, "Missing 'val' key.")
         if isinstance(data["val"], str):
             return data
         if isinstance(data["val"], list) and all(
@@ -76,7 +76,7 @@ class AbstractBaseStringMatcherRule(AbstractBaseRule, metaclass=ABCMeta):
             return data
         type_name = type(data["val"]).__name__
         msg = "'val' must be string or list of strings (got {}).".format(type_name)
-        raise InvalidRuleError(msg)
+        raise InvalidRuleError(cls, msg)
 
     @classmethod
     def get_class_from_name(cls, name):
@@ -84,9 +84,9 @@ class AbstractBaseStringMatcherRule(AbstractBaseRule, metaclass=ABCMeta):
         try:
             return STRING_RULE_MAPPING[name]
         except KeyError:
-            vals = STRING_RULE_MAPPING.keys()
+            vals = list(STRING_RULE_MAPPING.keys())
             raise InvalidRuleError(
-                "Invalid value for 'match'. Must be one of {}.".format(vals)
+                cls, "Invalid value for 'match'. Must be one of {}.".format(vals)
             )
 
     def get_window_data(self, window):
