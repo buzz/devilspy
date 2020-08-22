@@ -1,7 +1,7 @@
 """All possible window actions."""
 
 from abc import ABCMeta, abstractmethod
-from gi.repository import GLib
+from gi.repository import GLib, Wnck
 
 from devilspy.config.abc import AbstractBaseConfigEnumerableEntity
 from devilspy.config.errors import InvalidActionError
@@ -10,7 +10,7 @@ from devilspy.config.errors import InvalidActionError
 class AbstractBaseAction(AbstractBaseConfigEnumerableEntity, metaclass=ABCMeta):
     """Abstract base class for all actions."""
 
-    arg_types = ()
+    arg_type = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -52,11 +52,26 @@ class AbstractBaseAction(AbstractBaseConfigEnumerableEntity, metaclass=ABCMeta):
         if "arg" not in data:
             raise InvalidActionError(cls, "Missing key 'arg'.")
 
-        if type(data["arg"]) not in cls.arg_types:
-            types = " or ".join(type_.__name__ for type_ in cls.arg_types)
-            raise InvalidActionError(
-                cls, "Field 'arg' must be of type {}.".format(types)
-            )
+        if isinstance(cls.arg_type, tuple):
+            is_list = isinstance(data["arg"], list)
+            if not is_list:
+                raise InvalidActionError(cls, "Field 'arg' must be a list.")
+            if len(data["arg"]) != len(cls.arg_type):
+                msg = "Field 'arg' must be a list with {} elements.".format(
+                    len(cls.arg_type)
+                )
+                raise InvalidActionError(cls, msg)
+            for i, type_ in enumerate(cls.arg_type):
+                if type(data["arg"][i]) not in (type_,):
+                    msg = "Field 'arg[{}]' must be of type {}.".format(
+                        i, type_.__name__
+                    )
+                    raise InvalidActionError(cls, msg)
+        else:
+            if type(data["arg"]) not in (cls.arg_type,):
+                raise InvalidActionError(
+                    cls, "Field 'arg' must be of type {}.".format(cls.arg_type.__name__)
+                )
 
         return data
 
@@ -72,7 +87,7 @@ class ActivateWorkspaceAction(AbstractBaseAction):
     """Switch to another workspace."""
 
     name = "activate_workspace"
-    arg_types = (int,)
+    arg_type = int
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -98,7 +113,7 @@ class MaximizeAction(AbstractBaseAction):
     """(Un)maximize window."""
 
     name = "maximize"
-    arg_types = (bool,)
+    arg_type = bool
 
     def run(self, window, screen):
         if self.arg:
@@ -109,11 +124,28 @@ class MaximizeAction(AbstractBaseAction):
                 window.unmaximize()
 
 
+class PositionWMAction(AbstractBaseAction):
+    """Set window position using window manager."""
+
+    name = "position_wm"
+    arg_type = (int, int)
+
+    def run(self, window, screen):
+        window.set_geometry(
+            Wnck.WindowGravity.CURRENT,
+            Wnck.WindowMoveResizeMask.X | Wnck.WindowMoveResizeMask.Y,
+            self.arg[0],
+            self.arg[1],
+            -1,
+            -1,
+        )
+
+
 class WorkspaceAction(AbstractBaseAction):
     """Move window to another workspace."""
 
     name = "workspace"
-    arg_types = (int,)
+    arg_type = int
 
     def run(self, window, screen):
         space = screen.get_workspace(self.arg)
@@ -121,5 +153,10 @@ class WorkspaceAction(AbstractBaseAction):
             window.move_to_workspace(space)
 
 
-ACTION_CLASSES = (ActivateWorkspaceAction, MaximizeAction, WorkspaceAction)
+ACTION_CLASSES = (
+    ActivateWorkspaceAction,
+    MaximizeAction,
+    PositionWMAction,
+    WorkspaceAction,
+)
 ACTION_MAPPING = {cls.name: cls for cls in ACTION_CLASSES}
