@@ -178,6 +178,19 @@ class PositionX11Action(AbstractBaseAction):
         xdisplay.sync()
 
 
+class ShadeAction(AbstractBaseAction):
+    """(Un)shade window."""
+
+    name = "shade"
+    arg_type = bool
+
+    def run(self, window, screen):
+        if self.arg:
+            window.shade()
+        else:
+            window.unshade()
+
+
 class SizeAction(AbstractBaseAction):
     """Set window size."""
 
@@ -213,6 +226,7 @@ ACTION_CLASSES = (
     OnTopAction,
     PositionWMAction,
     PositionX11Action,
+    ShadeAction,
     SizeAction,
     WorkspaceAction,
 )
