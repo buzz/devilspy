@@ -131,6 +131,19 @@ class DecorateAction(AbstractBaseAction):
             gdk_window.set_decorations(0)
 
 
+class FullscreenAction(AbstractBaseAction):
+    """(Un)set window fullscreen state."""
+
+    name = "fullscreen"
+    arg_type = bool
+
+    def run(self, window, screen):
+        if self.arg and not window.is_fullscreen():
+            window.set_fullscreen(True)
+        elif window.is_fullscreen():
+            window.set_fullscreen(False)
+
+
 class MaximizeAction(AbstractBaseAction):
     """(Un)maximize window."""
 
@@ -336,6 +349,7 @@ class WorkspaceAction(AbstractBaseAction):
 ACTION_CLASSES = (
     ActivateWorkspaceAction,
     DecorateAction,
+    FullscreenAction,
     MaximizeAction,
     MaximizeHAction,
     MaximizeVAction,
