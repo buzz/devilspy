@@ -115,6 +115,31 @@ class ActivateWorkspaceAction(AbstractBaseAction):
         return False  # Notify GLib to cancel this timeout
 
 
+class CenterAction(AbstractBaseAction):
+    """Center window."""
+
+    name = "center"
+    arg_type = bool
+
+    def run(self, window, screen):
+        _, _, win_w, win_h = window.get_geometry()
+        space = window.get_workspace()
+        if not space:
+            space = screen.get_workspace(0)
+        space_w = space.get_width()
+        space_h = space.get_height()
+        xpos = round((space_w - win_w) / 2)
+        ypos = round((space_h - win_h) / 2)
+        window.set_geometry(
+            Wnck.WindowGravity.STATIC,
+            Wnck.WindowMoveResizeMask.X | Wnck.WindowMoveResizeMask.Y,
+            xpos,
+            ypos,
+            -1,
+            -1,
+        )
+
+
 class DecorateAction(AbstractBaseAction):
     """(Un)decorate window."""
 
@@ -242,7 +267,7 @@ class PositionWMAction(AbstractBaseAction):
 
     def run(self, window, screen):
         window.set_geometry(
-            Wnck.WindowGravity.CURRENT,
+            Wnck.WindowGravity.STATIC,
             Wnck.WindowMoveResizeMask.X | Wnck.WindowMoveResizeMask.Y,
             self.arg[0],
             self.arg[1],
@@ -348,6 +373,7 @@ class WorkspaceAction(AbstractBaseAction):
 
 ACTION_CLASSES = (
     ActivateWorkspaceAction,
+    CenterAction,
     DecorateAction,
     FullscreenAction,
     MaximizeAction,
