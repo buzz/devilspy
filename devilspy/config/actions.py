@@ -160,6 +160,21 @@ class MaximizeVAction(AbstractBaseAction):
                 window.unmaximize_vertically()
 
 
+class MinimizeAction(AbstractBaseAction):
+    """(Un)minimize window vertically."""
+
+    name = "minimize"
+    arg_type = bool
+
+    def run(self, window, screen):
+        if self.arg:
+            if not window.is_minimized():
+                window.minimize()
+        else:
+            if window.is_minimized():
+                window.unminimize(0)
+
+
 class OnTopAction(AbstractBaseAction):
     """Set window on top."""
 
@@ -255,6 +270,7 @@ ACTION_CLASSES = (
     MaximizeAction,
     MaximizeHAction,
     MaximizeVAction,
+    MinimizeAction,
     OnTopAction,
     PositionWMAction,
     PositionX11Action,
