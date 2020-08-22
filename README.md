@@ -31,8 +31,9 @@ $ devilspy --print-window-info
 ```
 
 Usually you want to start devilspy in the background with your login session
-once you have your rules setup. Use *Startup applications*, *Autostart* or
-similar, depending on your Desktop Environment.
+once you have configured your rules. Use
+[Autostart](https://wiki.archlinux.org/index.php/Autostarting#On_desktop_environment_startup)
+or similar, depending on your Desktop Environment.
 
 ```
 $ devilspy --fork
