@@ -53,28 +53,33 @@ class AbstractBaseAction(AbstractBaseConfigEnumerableEntity, metaclass=ABCMeta):
         if "arg" not in data:
             raise InvalidActionError(cls, "Missing key 'arg'.")
 
-        if isinstance(cls.arg_type, tuple):
-            is_list = isinstance(data["arg"], list)
-            if not is_list:
+        # Expecting arg list
+        if isinstance(cls.arg_type, list):
+            if not isinstance(data["arg"], list):
                 raise InvalidActionError(cls, "Field 'arg' must be a list.")
             if len(data["arg"]) != len(cls.arg_type):
                 msg = "Field 'arg' must be a list with {} elements.".format(
                     len(cls.arg_type)
                 )
                 raise InvalidActionError(cls, msg)
+
             for i, type_ in enumerate(cls.arg_type):
-                if type(data["arg"][i]) not in (type_,):
-                    msg = "Field 'arg[{}]' must be of type {}.".format(
-                        i, type_.__name__
-                    )
-                    raise InvalidActionError(cls, msg)
+                cls.validate_arg(type_, data["arg"][i], i)
         else:
-            if type(data["arg"]) not in (cls.arg_type,):
-                raise InvalidActionError(
-                    cls, "Field 'arg' must be of type {}.".format(cls.arg_type.__name__)
-                )
+            cls.validate_arg(cls.arg_type, data["arg"])
 
         return data
+
+    @classmethod
+    def validate_arg(cls, type_, arg, i=None):
+        """Validate action arg field."""
+        if not isinstance(type_, tuple):
+            type_ = (type_,)
+        if type(arg) not in type_:
+            idx = "[{}]".format(i) if i else ""
+            types = ",".join(t.__name__ for t in type_)
+            msg = "Field 'arg{}' must be of type {}.".format(idx, types)
+            raise InvalidActionError(cls, msg)
 
     @abstractmethod
     def run(self, window, screen):
@@ -125,11 +130,28 @@ class MaximizeAction(AbstractBaseAction):
                 window.unmaximize()
 
 
+class OnTopAction(AbstractBaseAction):
+    """Set window on top."""
+
+    name = "on_top"
+    arg_type = (bool, str)
+
+    def run(self, window, screen):
+        if type(self.arg) in (bool,):
+            if self.arg:
+                window.make_above()
+                window.unmake_above()
+            else:
+                window.unmake_above()
+        elif self.arg == "always":
+            window.make_above()
+
+
 class PositionWMAction(AbstractBaseAction):
     """Set window position using window manager."""
 
     name = "position_wm"
-    arg_type = (int, int)
+    arg_type = [int, int]
 
     def run(self, window, screen):
         window.set_geometry(
@@ -146,7 +168,7 @@ class PositionX11Action(AbstractBaseAction):
     """Set window position using X11."""
 
     name = "position_x11"
-    arg_type = (int, int)
+    arg_type = [int, int]
 
     def run(self, window, screen):
         xid = window.get_xid()
@@ -156,11 +178,21 @@ class PositionX11Action(AbstractBaseAction):
         xdisplay.sync()
 
 
-class SetWindowSizeAction(AbstractBaseAction):
+class SizeAction(AbstractBaseAction):
     """Set window size."""
 
-    name = "set_size"
-    arg_type = (int, int)
+    name = "size"
+    arg_type = [int, int]
+
+    def run(self, window, screen):
+        window.set_geometry(
+            Wnck.WindowGravity.CURRENT,
+            Wnck.WindowMoveResizeMask.WIDTH | Wnck.WindowMoveResizeMask.HEIGHT,
+            -1,
+            -1,
+            self.arg[0],
+            self.arg[1],
+        )
 
 
 class WorkspaceAction(AbstractBaseAction):
@@ -178,9 +210,10 @@ class WorkspaceAction(AbstractBaseAction):
 ACTION_CLASSES = (
     ActivateWorkspaceAction,
     MaximizeAction,
+    OnTopAction,
     PositionWMAction,
     PositionX11Action,
-    SetWindowSizeAction,
+    SizeAction,
     WorkspaceAction,
 )
 ACTION_MAPPING = {cls.name: cls for cls in ACTION_CLASSES}
