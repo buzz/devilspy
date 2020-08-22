@@ -208,6 +208,19 @@ class OnTopAction(AbstractBaseAction):
             window.make_above()
 
 
+class PinAction(AbstractBaseAction):
+    """(Un)pin window to all workspaces."""
+
+    name = "pin"
+    arg_type = bool
+
+    def run(self, window, screen):
+        if self.arg and not window.is_pinned():
+            window.pin()
+        elif window.is_pinned():
+            window.unpin()
+
+
 class PositionWMAction(AbstractBaseAction):
     """Set window position using window manager."""
 
@@ -289,6 +302,7 @@ ACTION_CLASSES = (
     MaximizeVAction,
     MinimizeAction,
     OnTopAction,
+    PinAction,
     PositionWMAction,
     PositionX11Action,
     ShadeAction,
