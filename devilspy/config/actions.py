@@ -282,6 +282,32 @@ class SizeAction(AbstractBaseAction):
         )
 
 
+class SkipPagerAction(AbstractBaseAction):
+    """Set skip window in pager."""
+
+    name = "skip_pager"
+    arg_type = bool
+
+    def run(self, window, screen):
+        if self.arg and not window.is_skip_pager():
+            window.set_skip_pager(True)
+        elif window.is_skip_pager():
+            window.set_skip_pager(False)
+
+
+class SkipTasklistAction(AbstractBaseAction):
+    """Set skip window in task list."""
+
+    name = "skip_tasklist"
+    arg_type = bool
+
+    def run(self, window, screen):
+        if self.arg and not window.is_skip_tasklist():
+            window.set_skip_tasklist(True)
+        elif window.is_skip_tasklist():
+            window.set_skip_tasklist(False)
+
+
 class StickAction(AbstractBaseAction):
     """(Un)stick window, keep window position fixed even when the workspace or viewport scrolls."""
 
@@ -320,6 +346,8 @@ ACTION_CLASSES = (
     PositionX11Action,
     ShadeAction,
     SizeAction,
+    SkipPagerAction,
+    SkipTasklistAction,
     StickAction,
     WorkspaceAction,
 )
