@@ -11,7 +11,7 @@ class AbstractBaseConfigEntity(metaclass=ABCMeta):
     """
     Abstract base class for all configuration elements.
 
-    All subclasses must define a static factory method create.
+    All subclasses must define a factory method create.
     """
 
     @classmethod
