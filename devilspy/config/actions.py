@@ -1,7 +1,8 @@
 """All possible window actions."""
 
 from abc import ABCMeta, abstractmethod
-from gi.repository import GLib, Wnck
+from gi.repository import Gdk, GdkX11, GLib, Wnck
+import Xlib.display
 
 from devilspy.config.abc import AbstractBaseConfigEnumerableEntity
 from devilspy.config.errors import InvalidActionError
@@ -141,6 +142,20 @@ class PositionWMAction(AbstractBaseAction):
         )
 
 
+class PositionX11Action(AbstractBaseAction):
+    """Set window position using X11."""
+
+    name = "position_x11"
+    arg_type = (int, int)
+
+    def run(self, window, screen):
+        xid = window.get_xid()
+        xdisplay = Xlib.display.Display()
+        xwindow = xdisplay.create_resource_object("window", xid)
+        xwindow.configure(x=self.arg[0], y=self.arg[1])
+        xdisplay.sync()
+
+
 class WorkspaceAction(AbstractBaseAction):
     """Move window to another workspace."""
 
@@ -157,6 +172,7 @@ ACTION_CLASSES = (
     ActivateWorkspaceAction,
     MaximizeAction,
     PositionWMAction,
+    PositionX11Action,
     WorkspaceAction,
 )
 ACTION_MAPPING = {cls.name: cls for cls in ACTION_CLASSES}

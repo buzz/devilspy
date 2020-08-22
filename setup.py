@@ -41,7 +41,7 @@ setup(
     ],
     url="https://github.com/buzz/devilspy",
     packages=find_packages(),
-    install_requires=["click", "PyGObject", "PyYAML"],
+    install_requires=["click", "PyGObject", "PyYAML", "python-xlib"],
     include_package_data=True,
     entry_points={"console_scripts": ["devilspy = devilspy.__main__:main"]},
 )
