@@ -130,6 +130,36 @@ class MaximizeAction(AbstractBaseAction):
                 window.unmaximize()
 
 
+class MaximizeHAction(AbstractBaseAction):
+    """(Un)maximize window horizontally."""
+
+    name = "maximize_h"
+    arg_type = bool
+
+    def run(self, window, screen):
+        if self.arg:
+            if not window.is_maximized_horizontally():
+                window.maximize_horizontally()
+        else:
+            if window.is_maximized_horizontally():
+                window.unmaximize_horizontally()
+
+
+class MaximizeVAction(AbstractBaseAction):
+    """(Un)maximize window vertically."""
+
+    name = "maximize_v"
+    arg_type = bool
+
+    def run(self, window, screen):
+        if self.arg:
+            if not window.is_maximized_vertically():
+                window.maximize_vertically()
+        else:
+            if window.is_maximized_vertically():
+                window.unmaximize_vertically()
+
+
 class OnTopAction(AbstractBaseAction):
     """Set window on top."""
 
@@ -223,6 +253,8 @@ class WorkspaceAction(AbstractBaseAction):
 ACTION_CLASSES = (
     ActivateWorkspaceAction,
     MaximizeAction,
+    MaximizeHAction,
+    MaximizeVAction,
     OnTopAction,
     PositionWMAction,
     PositionX11Action,
