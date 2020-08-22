@@ -24,7 +24,7 @@ class Config(AbstractBaseConfigEntity):
             with open(filepath, "r") as configfile:
                 data = yaml.safe_load(configfile.read())
                 config = cls.create(data, filepath)
-                logger.debug("Config: %s", config)
+                logger.debug("Configuration loaded: {}".format(config))
                 return config
         except FileNotFoundError:
             logger.warning("Config file not found.")
@@ -49,3 +49,9 @@ class Config(AbstractBaseConfigEntity):
         if not isinstance(data, dict):
             raise InvalidEntryError("Config must be of type dict.")
         return data
+
+    def __str__(self):
+        ret = "\n  Config file: {}\n".format(self._filepath)
+        for entry in self.entries:
+            ret += "{}".format(entry)
+        return ret.rstrip()

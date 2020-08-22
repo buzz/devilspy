@@ -74,3 +74,13 @@ class Entry(AbstractBaseConfigEntity):
             )
             if not dry_run:
                 action.run(window, screen)
+
+    def __str__(self):
+        ret = "    Entry:\n"
+        ret += "      Actions:\n"
+        for action in self.actions:
+            ret += "      {}\n".format(action)
+        ret += "      Rules:\n"
+        for rule in self.rules:
+            ret += "      {}\n".format(rule)
+        return ret

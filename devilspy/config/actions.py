@@ -64,6 +64,9 @@ class AbstractBaseAction(AbstractBaseConfigEnumerableEntity, metaclass=ABCMeta):
     def run(self, window, screen):
         """Carry out window action."""
 
+    def __str__(self):
+        return "  {}: arg={}".format(type(self).__name__, self.arg)
+
 
 class ActivateWorkspaceAction(AbstractBaseAction):
     """Switch to another workspace."""

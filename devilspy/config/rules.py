@@ -99,6 +99,9 @@ class AbstractBaseStringMatcherRule(AbstractBaseRule, metaclass=ABCMeta):
             return window.get_role()
         return window.get_application().get_name()  # field == "app_name"
 
+    def __str__(self):
+        return "  {}: field={} val={}".format(type(self).__name__, self.field, self.val)
+
 
 class ExactStringRule(AbstractBaseStringMatcherRule):
     """Match exact string equality."""
