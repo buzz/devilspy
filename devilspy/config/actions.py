@@ -156,6 +156,13 @@ class PositionX11Action(AbstractBaseAction):
         xdisplay.sync()
 
 
+class SetWindowSizeAction(AbstractBaseAction):
+    """Set window size."""
+
+    name = "set_size"
+    arg_type = (int, int)
+
+
 class WorkspaceAction(AbstractBaseAction):
     """Move window to another workspace."""
 
@@ -173,6 +180,7 @@ ACTION_CLASSES = (
     MaximizeAction,
     PositionWMAction,
     PositionX11Action,
+    SetWindowSizeAction,
     WorkspaceAction,
 )
 ACTION_MAPPING = {cls.name: cls for cls in ACTION_CLASSES}
