@@ -52,7 +52,7 @@ class AbstractBaseAction(AbstractBaseConfigEnumerableEntity, metaclass=ABCMeta):
         if "arg" not in data:
             raise InvalidActionError(cls, "Missing key 'arg'.")
 
-        if not isinstance(data["arg"], cls.arg_types):
+        if type(data["arg"]) not in cls.arg_types:
             types = " or ".join(type_.__name__ for type_ in cls.arg_types)
             raise InvalidActionError(
                 cls, "Field 'arg' must be of type {}.".format(types)
