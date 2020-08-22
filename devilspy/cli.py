@@ -33,14 +33,18 @@ def parse_config(_, __, filepath):
     return Config.load_yaml_file(filepath)
 
 
+def cb_debug(ctx, param, debug):
+    """Enable debug logging."""
+    if debug:
+        main_logger.setLevel(logging.DEBUG)
+        main_logger.debug("Debug logging enabled.")
+
+
 def cb_print_window_info(ctx, param, print_window_info):
     """Enable if debug is set."""
-    try:
-        if ctx.params["debug"] and not print_window_info:
-            main_logger.info("Enabling --print-window-info because --debug is true.")
-            return True
-    except KeyError:
-        pass
+    if main_logger.isEnabledFor(logging.DEBUG) and not print_window_info:
+        main_logger.info("Enabling --print-window-info because --debug is true.")
+        return True
     return print_window_info
 
 
@@ -76,18 +80,22 @@ class CustomEpilogCommand(click.Command):
     is_flag=True,
     help="Print information about new windows.",
 )
-@click.option("-d", "--debug", is_flag=True, help="Print debug messages.")
+@click.option(
+    "-d",
+    "--debug",
+    callback=cb_debug,
+    expose_value=False,
+    is_flag=True,
+    help="Print debug messages.",
+)
 @click.version_option(VERSION)
-def cli(config, fork, no_actions, print_window_info, debug):
+def cli(config, fork, no_actions, print_window_info):
     """Instantiate and start an devilspy."""
     if fork:
         pid = os.fork()
         if pid > 0:
             # parent process
             sys.exit(0)
-
-    if debug:
-        main_logger.setLevel(logging.DEBUG)
 
     Gdk.init([])
     main_loop = GLib.MainLoop()
