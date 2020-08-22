@@ -28,11 +28,6 @@ def get_epilog():
     return EPILOG.format(WEBSITE)
 
 
-def parse_config(_, __, filepath):
-    """Parse YAML config file."""
-    return Config.load_yaml_file(filepath)
-
-
 def cb_debug(ctx, param, debug):
     """Enable debug logging."""
     if debug:
@@ -63,7 +58,6 @@ class CustomEpilogCommand(click.Command):
 @click.option(
     "-c",
     "--config",
-    callback=parse_config,
     default=default_config_file,
     show_default=True,
     help="Config file to load.",
@@ -97,12 +91,14 @@ def cli(config, fork, no_actions, print_window_info):
             # parent process
             sys.exit(0)
 
+    parsed_config = Config.load_yaml_file(config)
+
     Gdk.init([])
     main_loop = GLib.MainLoop()
 
     try:
         WindowSpy(
-            config, print_window_info, no_actions,
+            parsed_config, print_window_info, no_actions,
         )
         main_loop.run()
     except KeyboardInterrupt:
