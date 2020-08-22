@@ -282,6 +282,19 @@ class SizeAction(AbstractBaseAction):
         )
 
 
+class StickAction(AbstractBaseAction):
+    """(Un)stick window, keep window position fixed even when the workspace or viewport scrolls."""
+
+    name = "stick"
+    arg_type = bool
+
+    def run(self, window, screen):
+        if self.arg and not window.is_sticky():
+            window.stick()
+        elif window.is_sticky():
+            window.unstick()
+
+
 class WorkspaceAction(AbstractBaseAction):
     """Move window to another workspace."""
 
@@ -307,6 +320,7 @@ ACTION_CLASSES = (
     PositionX11Action,
     ShadeAction,
     SizeAction,
+    StickAction,
     WorkspaceAction,
 )
 ACTION_MAPPING = {cls.name: cls for cls in ACTION_CLASSES}
