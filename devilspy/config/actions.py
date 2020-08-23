@@ -1,8 +1,11 @@
 """All possible window actions."""
 
 from abc import ABCMeta, abstractmethod
+import struct
+
 from gi.repository import Gdk, GdkX11, GLib, Wnck
-import Xlib.display
+from Xlib.display import Display as XDisplay
+from Xlib import Xatom
 
 from devilspy.config.abc import AbstractBaseConfigEnumerableEntity
 from devilspy.config.errors import InvalidActionError
@@ -246,6 +249,22 @@ class OnTopAction(AbstractBaseAction):
             window.make_above()
 
 
+class OpacityAction(AbstractBaseAction):
+    """Set window opacity."""
+
+    name = "opacity"
+    arg_type = float
+
+    def run(self, window, screen):
+        opacity = max(0.0, min(1.0, self.arg))
+        xdisplay = XDisplay()
+        xwindow = xdisplay.create_resource_object("window", window.get_xid())
+        atom = xdisplay.intern_atom("_NET_WM_WINDOW_OPACITY")
+        data = struct.pack("L", int(4294967295 * opacity))
+        xwindow.change_property(atom, Xatom.CARDINAL, 32, data)
+        xdisplay.sync()
+
+
 class PinAction(AbstractBaseAction):
     """(Un)pin window to all workspaces."""
 
@@ -284,7 +303,7 @@ class PositionX11Action(AbstractBaseAction):
 
     def run(self, window, screen):
         xid = window.get_xid()
-        xdisplay = Xlib.display.Display()
+        xdisplay = XDisplay()
         xwindow = xdisplay.create_resource_object("window", xid)
         xwindow.configure(x=self.arg[0], y=self.arg[1])
         xdisplay.sync()
@@ -381,6 +400,7 @@ ACTION_CLASSES = (
     MaximizeVAction,
     MinimizeAction,
     OnTopAction,
+    OpacityAction,
     PinAction,
     PositionWMAction,
     PositionX11Action,
