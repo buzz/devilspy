@@ -11,6 +11,12 @@ from devilspy.config.abc import AbstractBaseConfigEnumerableEntity
 from devilspy.config.errors import InvalidActionError
 
 
+def get_gdk_window(window):
+    xid = window.get_xid()
+    gdk_display = GdkX11.X11Display.get_default()
+    return GdkX11.X11Window.foreign_new_for_display(gdk_display, xid)
+
+
 class AbstractBaseAction(AbstractBaseConfigEnumerableEntity, metaclass=ABCMeta):
     """Abstract base class for all actions."""
 
@@ -92,6 +98,17 @@ class AbstractBaseAction(AbstractBaseConfigEnumerableEntity, metaclass=ABCMeta):
         return "  {}: arg={}".format(type(self).__name__, self.arg)
 
 
+class ActivateAction(AbstractBaseAction):
+    """Activate window."""
+
+    name = "activate"
+    arg_type = (bool)
+
+    def run(self, window, screen):
+        gdk_window = get_gdk_window(window)
+        window.activate(GdkX11.x11_get_server_time(gdk_window))
+
+
 class ActivateWorkspaceAction(AbstractBaseAction):
     """Switch to another workspace."""
 
@@ -109,12 +126,14 @@ class ActivateWorkspaceAction(AbstractBaseAction):
             if active_space and space == active_space:
                 return
             # Delay workspace switch or some window managers have display issues
-            GLib.timeout_add(100, self._delayed_activate_workspace, space)
+            gdk_window = get_gdk_window(window)
+            timestamp = GdkX11.x11_get_server_time(gdk_window)
+            GLib.timeout_add(100, self._delayed_activate_workspace, space, timestamp)
 
     @staticmethod
-    def _delayed_activate_workspace(space):
+    def _delayed_activate_workspace(space, timestamp):
         """Delayed workspace switch."""
-        space.activate(0)
+        space.activate(timestamp)
         return False  # Notify GLib to cancel this timeout
 
 
@@ -150,9 +169,7 @@ class DecorateAction(AbstractBaseAction):
     arg_type = bool
 
     def run(self, window, screen):
-        xid = window.get_xid()
-        gdk_display = GdkX11.X11Display.get_default()
-        gdk_window = GdkX11.X11Window.foreign_new_for_display(gdk_display, xid)
+        gdk_window = get_gdk_window(window)
         if self.arg:
             gdk_window.set_decorations(Gdk.WMDecoration.ALL)
         else:
@@ -229,7 +246,8 @@ class MinimizeAction(AbstractBaseAction):
                 window.minimize()
         else:
             if window.is_minimized():
-                window.unminimize(0)
+                gdk_window = get_gdk_window(window)
+                window.unminimize(GdkX11.x11_get_server_time(gdk_window))
 
 
 class OnTopAction(AbstractBaseAction):
@@ -391,6 +409,7 @@ class WorkspaceAction(AbstractBaseAction):
 
 
 ACTION_CLASSES = (
+    ActivateAction,
     ActivateWorkspaceAction,
     CenterAction,
     DecorateAction,
