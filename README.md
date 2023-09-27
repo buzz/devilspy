@@ -1,3 +1,7 @@
+*UNMAINTAINED*
+
+*Check out [Devilspie2](https://www.nongnu.org/devilspie2/) if you look for a window matching tool.*
+
 # devilspy
 
 devilspy is a window matching utility, allowing the user to perform
